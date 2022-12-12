@@ -1,5 +1,8 @@
 import * as styled from 'styled-components';
 
+import GeneralSansLightWoff2 from '../assets/fonts/GeneralSans-Light.woff2';
+import GeneralSansLightWoff from '../assets/fonts/GeneralSans-Light.woff';
+import GeneralSansLightTtf from '../assets/fonts/GeneralSans-Light.ttf';
 import GeneralSansRegularWoff2 from '../assets/fonts/GeneralSans-Regular.woff2';
 import GeneralSansRegularWoff from '../assets/fonts/GeneralSans-Regular.woff';
 import GeneralSansRegularTtf from '../assets/fonts/GeneralSans-Regular.ttf';
@@ -11,6 +14,16 @@ import GeneralSansSemiboldWoff from '../assets/fonts/GeneralSans-Semibold.woff';
 import GeneralSansSemiboldTtf from '../assets/fonts/GeneralSans-Semibold.ttf';
 
 export const GlobalStyles = styled.createGlobalStyle`
+	@font-face {
+		font-family: 'GeneralSans';
+		font-weight: 300;
+		font-display: 'swap';
+		font-style: 'normal';
+		src: url('${GeneralSansLightWoff2}') format('woff2'),
+			url('${GeneralSansLightWoff}') format('woff'),
+			url('${GeneralSansLightTtf}') format('truetype');
+	}
+
 	@font-face {
 		font-family: 'GeneralSans';
 		font-weight: 400;
@@ -77,5 +90,39 @@ export const GlobalStyles = styled.createGlobalStyle`
 	a {
 		color: inherit;
 		text-decoration: none;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-weight: 600;
+		line-height: 120%;
+	}
+
+	h1 {
+		font-size: 3rem;
+	}
+
+	h2 {
+		font-size: 2.5rem;
+	}
+
+	h3 {
+		font-size: 2rem;
+	}
+
+	h4 {
+		font-size: 1.5rem;
+	}
+
+	h5 {
+		font-size: 1.25rem;
+	}
+
+	h6 {
+		font-size: 1rem;
 	}
 `;
