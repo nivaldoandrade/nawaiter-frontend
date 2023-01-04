@@ -4,8 +4,8 @@ import theme from './styles/themes/default';
 
 import { Header } from './components/Header';
 
-import { GlobalStyles } from './styles/GlobalStyles';
 import { Orders } from './components/Orders';
+import { GlobalStyles } from './styles/GlobalStyles';
 
 export function App() {
 	return (
