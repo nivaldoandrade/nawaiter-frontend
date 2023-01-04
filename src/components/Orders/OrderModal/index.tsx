@@ -11,33 +11,57 @@ import { Order } from '../../../types/Order';
 import closeIconImg from '../../../assets/images/close-icon.svg';
 
 import {
-	Overlay,
-	Title,
+	CancelButton,
 	Container,
-	Status,
 	Items,
-	CancelButton
+	Overlay,
+	Status,
+	Title
 } from './styles';
 
 interface OrderModalProps {
 	isVisible: boolean;
 	order: null | Order;
-	iconStatus: string;
-	titleStatus: string;
 	onClose: () => void;
+	onDeleteOrder: (orderId: string, orderStatus: Order['status']) => void;
+	onChangeOrder: (order: Order) => void;
 }
+
+const statusOrder = {
+	WAITING: {
+		icon: '🕑',
+		title: 'Fila de espera'
+	},
+	IN_PRODUCTION: {
+		icon: '👩‍🍳',
+		title: 'Em produção'
+	},
+	DONE: {
+		icon: '✅',
+		title: 'Pronto!'
+	}
+};
 
 export function OrderModal({
 	isVisible,
 	order,
-	iconStatus,
-	titleStatus,
-	onClose
+	onClose,
+	onDeleteOrder,
+	onChangeOrder
 }: OrderModalProps) {
-	const { shouldRender, overlayRef, total } = useOrderModal({
+	const {
+		shouldRender,
+		overlayRef,
+		total,
+		handleCancelOrder,
+		isLoadingCancelOrder,
+		handleChangeOrder
+	} = useOrderModal({
 		isVisible,
 		order,
-		onClose
+		onClose,
+		onDeleteOrder,
+		onChangeOrder
 	});
 
 	if (!shouldRender || !order) {
@@ -50,7 +74,11 @@ export function OrderModal({
 				<Container>
 					<header>
 						<h4>Mesa {order.table}</h4>
-						<button type="button" onClick={onClose}>
+						<button
+							type="button"
+							onClick={onClose}
+							disabled={isLoadingCancelOrder}
+						>
 							<img src={closeIconImg} alt="Icone de fechar" />
 						</button>
 					</header>
@@ -58,8 +86,8 @@ export function OrderModal({
 						<Status>
 							<Title>Status do Pedido</Title>
 							<div className="status-content">
-								<i>{iconStatus}</i>
-								<h6>{titleStatus}</h6>
+								<i>{statusOrder[order.status].icon}</i>
+								<h6>{statusOrder[order.status].title}</h6>
 							</div>
 						</Status>
 						<Items>
@@ -86,8 +114,18 @@ export function OrderModal({
 						</Items>
 					</main>
 					<footer>
-						<CompleteButton status={order.status} />
-						<CancelButton type="button">Cancelar Pedido</CancelButton>
+						<CompleteButton
+							status={order.status}
+							disabled={isLoadingCancelOrder}
+							onClick={() => handleChangeOrder(order)}
+						/>
+						<CancelButton
+							disabled={isLoadingCancelOrder}
+							type="button"
+							onClick={() => handleCancelOrder(order._id, order.status)}
+						>
+							Cancelar Pedido
+						</CancelButton>
 					</footer>
 				</Container>
 			</Overlay>

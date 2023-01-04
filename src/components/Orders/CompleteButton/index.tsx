@@ -1,7 +1,11 @@
 import { Order } from '../../../types/Order';
 import { Container } from './styles';
 
-type CompleteButtonProps = Pick<Order, 'status'>;
+// type CompleteButtonProps = ;
+
+interface CompleteButtonProps
+	extends Pick<Order, 'status'>,
+		React.ButtonHTMLAttributes<HTMLButtonElement> {}
 
 const statusOrder = {
 	WAITING: {
@@ -18,9 +22,9 @@ const statusOrder = {
 	}
 };
 
-export function CompleteButton({ status }: CompleteButtonProps) {
+export function CompleteButton({ status, ...rest }: CompleteButtonProps) {
 	return (
-		<Container type="button">
+		<Container {...rest} type="button">
 			<i>{statusOrder[status].icon}</i>
 			<strong>{statusOrder[status].title}</strong>
 		</Container>

@@ -46,6 +46,11 @@ export const Container = styled.div`
 		flex-direction: column;
 		margin: 2rem 0;
 	}
+
+	button:disabled {
+		opacity: 0.7;
+		cursor: not-allowed;
+	}
 `;
 
 export const Status = styled.div`

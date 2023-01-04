@@ -1,19 +1,34 @@
-import { createRef, useEffect, useMemo, useState } from 'react';
+/* eslint-disable prettier/prettier */
+/* eslint-disable prefer-const */
+import { createRef, useCallback, useEffect, useMemo, useState } from 'react';
 import { Order } from '../../../types/Order';
+import api from '../../../utils/api';
 
 interface useMountOrderModalProps {
 	isVisible: boolean;
 	order: null | Order;
 	onClose: () => void;
+	onDeleteOrder: (orderId: string, orderStatus: Order['status']) => void;
+	onChangeOrder: (order: Order) => void;
+}
+
+interface EventCloseModal {
+	target: EventTarget | null;
+	key?: string;
 }
 
 export function useOrderModal({
 	isVisible,
 	order,
-	onClose
+	onClose,
+	onDeleteOrder,
+	onChangeOrder
 }: useMountOrderModalProps) {
+	const [isLoadingCancelOrder, setIsloadingCancelOrder] = useState(false);
+
 	const [shouldRender, setShouldRender] = useState(false);
-	const overlayRef = createRef<HTMLDivElement>();
+
+	let overlayRef = createRef<HTMLDivElement>();
 
 	useEffect(() => {
 		if (isVisible) {
@@ -22,34 +37,70 @@ export function useOrderModal({
 
 		const overlayRefElement = overlayRef.current;
 
-		function handleCloseModal(event: MouseEvent | KeyboardEvent) {
-			if (overlayRefElement === event.target || event.type === 'keydown') {
+		function handleCloseModal(event: EventCloseModal) {
+			console.log(event);
+			if (overlayRefElement === event.target || event.key === 'Escape') {
 				onClose();
 			}
 		}
 
-		document.addEventListener('keydown', (event) => {
-			handleCloseModal(event);
-		});
+		if (isVisible && overlayRefElement && !isLoadingCancelOrder) {
+			overlayRefElement.addEventListener('click', handleCloseModal);
 
-		if (isVisible && overlayRefElement) {
-			overlayRefElement.addEventListener('click', (event) =>
-				handleCloseModal(event)
-			);
+			document.addEventListener('keydown', handleCloseModal);
 		}
 
 		return () => {
-			if (overlayRefElement) {
-				overlayRefElement.removeEventListener('click', (event) =>
-					handleCloseModal(event)
-				);
+			overlayRefElement?.removeEventListener('click', handleCloseModal);
+
+			document.removeEventListener('keydown', handleCloseModal);
+		};
+	}, [isVisible, overlayRef, isLoadingCancelOrder, onClose]);
+
+	const handleCancelOrder = useCallback(
+		async (orderId: string, orderStatus: Order['status']) => {
+			setIsloadingCancelOrder(true);
+
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+			await api.delete(`orders/${orderId}`);
+			onDeleteOrder(orderId, orderStatus);
+
+			setIsloadingCancelOrder(false);
+			onClose();
+		},
+		[onDeleteOrder, onClose]
+	);
+
+	const handleChangeOrder = useCallback(
+		async (order: Order) => {
+			setIsloadingCancelOrder(true);
+
+			if (order.status === 'DONE') {
+				alert('Pedido Entregue!');
+
+			} else {
+				const newStatus = order.status === 'WAITING' ? 'IN_PRODUCTION' : 'DONE';
+				const route = `/orders/${order._id}/${order.status === 'WAITING' ? 'production' : 'done'
+					}`;
+
+
+				await new Promise((resolve) => setTimeout(resolve, 2000));
+				await api.put(route);
+
+				onDeleteOrder(order._id, order.status);
+
+				const newOrder: Order = { ...order, status: newStatus };
+
+				onChangeOrder(newOrder);
 			}
 
-			document.removeEventListener('keydown', (event) => {
-				handleCloseModal(event);
-			});
-		};
-	}, [isVisible, overlayRef]);
+
+
+			setIsloadingCancelOrder(false);
+			onClose();
+		},
+		[onChangeOrder, onClose, onDeleteOrder]
+	);
 
 	const total = useMemo(
 		() =>
@@ -62,6 +113,9 @@ export function useOrderModal({
 	return {
 		shouldRender,
 		overlayRef,
-		total
+		total,
+		handleCancelOrder,
+		isLoadingCancelOrder,
+		handleChangeOrder
 	};
 }
